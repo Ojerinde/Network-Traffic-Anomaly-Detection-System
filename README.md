@@ -2,33 +2,31 @@
 
 ## Project Objectives
 
-This project addresses the critical need for automated network security monitoring in modern cybersecurity infrastructure. The primary objectives are:
+This initiative aims to address the growing requirement for automated network security surveillance in contemporary cybersecurity environments. The goals include:
 
-- **Develop an Intelligent System**: Create a machine learning-based system to identify malicious network traffic patterns with high accuracy.
-- **Compare Learning Approaches**: Evaluate supervised (Random Forest) and unsupervised (Isolation Forest) methods for cybersecurity applications.
-- **Ensure Scalability**: Design a flexible, scalable solution adaptable to evolving threat landscapes.
-- **Minimize False Positives**: Achieve high detection accuracy while ensuring minimal disruption to legitimate network operations.
+- **Create an Intelligent System**: Develop a machine learning-driven system capable of accurately detecting harmful network traffic patterns.
+- **Compare Learning Techniques**: Assess both supervised (Random Forest) and unsupervised (Isolation Forest) methodologies for applications in cybersecurity.
+- **Guarantee Scalability**: Build a flexible and scalable solution that can adjust to changing threat landscapes.
 
 ## Project Overview
 
-This project implements a machine learning-based anomaly detection system for identifying unusual patterns in network traffic, essential for cybersecurity applications such as intrusion detection, DDoS attack identification, and data exfiltration prevention. Built in Python, the system utilizes the NSL-KDD dataset and combines supervised learning (Random Forest Classifier) with unsupervised learning (Isolation Forest) to achieve robust and comprehensive anomaly detection. The pipeline includes data preprocessing, model training, performance evaluation, and result visualization.
+This project establishes an anomaly detection system based on machine learning to recognize abnormal patterns in network traffic, critical for cybersecurity functions such as intrusion detection, identifying DDoS attacks, and preventing data exfiltration. Developed in Python, the system employs the NSL-KDD dataset and integrates supervised learning (via a Random Forest Classifier) with unsupervised learning (through Isolation Forest) to provide thorough and effective anomaly detection. The workflow incorporates data preprocessing, model training, performance assessment, and result visualization.
 
 ## Mathematical Foundation
 
-### Machine Learning Methods (Linear Algebra, Probability, Discrete Mathematics)
+### Machine Learning Methods
 
-**Random Forest (Supervised)** constructs an ensemble of decision trees, each splitting on feature thresholds to maximize information gain:
-
+**Random Forest (Supervised)** constructs an ensemble of decision trees, each splitting on feature thresholds to maximize **information gain** _(a measure used to choose the most informative feature to split on)_:
 \[
 \text{Information Gain}(S, A) = H(S) - \sum\_{v} \frac{|S_v|}{|S|} H(S_v)
 \]
 
-- \(H(S) = -\sum p_i \log_2 p_i\): Entropy of set \(S\)
+- \(H(S) = -\sum p\*i \log_2 p_i\): Entropy of set \(S\) (measures the uncertainty or disorder in the data distribution)
 - \(S_v\): Subset after splitting on feature \(A\), value \(v\)
-- Aggregates tree predictions for robust classification (**algorithms**, **probability**, **discrete mathematics**).
+- Aggregates tree predictions for robust classification
 
-**Isolation Forest (Unsupervised)** isolates anomalies by constructing random trees:
-
+**Isolation Forest (Unsupervised)** isolates anomalies by constructing random trees.  
+It is particularly effective for detecting outliers in **unlabeled** datasets, making it suitable for real-world anomaly detection where labeled data is scarce.
 \[
 E(h(x)) = c(n) \times 2^{-\frac{E(h(x))}{c(n)}}
 \]
@@ -36,9 +34,9 @@ E(h(x)) = c(n) \times 2^{-\frac{E(h(x))}{c(n)}}
 - \(h(x)\): Path length of point \(x\) in a tree
 - \(E(h(x))\): Expected path length across trees
 - \(c(n)\): Average path length of an unsuccessful search in a binary search tree
-- Shorter paths indicate anomalies (**algorithms**, **discrete mathematics**).
+- Shorter paths indicate anomalies
 
-### Information Theory (Probability)
+### Information Theory
 
 **Entropy-Based Anomaly Detection**:
 
@@ -46,7 +44,7 @@ E(h(x)) = c(n) \times 2^{-\frac{E(h(x))}{c(n)}}
 H(X) = -\sum p(x) \log_2 p(x)
 \]
 
-High entropy indicates potential anomalies (**probability**).
+High entropy indicates potential anomalies. .
 
 **Mutual Information** for feature selection:
 
@@ -72,7 +70,7 @@ Enhances model performance by identifying relevant features).
 3. **Machine Learning Models**:
 
    - **Supervised (`run_supervised.py`)**: Trains Random Forest (`n_estimators=100`, `max_depth=10`) on labeled data, achieving 71% accuracy, 94% attack precision, and 93% normal recall.
-   - **Unsupervised (`run_unsupervised.py`)**: Trains Isolation Forest (`contamination=0.1`, `n_estimators=100`), detecting anomalies in 49% of unlabeled traffic.
+   - **Unsupervised (`run_unsupervised.py`)**: Trains Isolation Forest (`contamination=0.1`, `n_estimators=100`), where `contamination=0.1` assumes 10% of the data is anomalous. The model detected anomalies in 49% of unlabeled traffic.
 
 4. **Evaluation (`utils/evaluate_models.py`)**:
 
