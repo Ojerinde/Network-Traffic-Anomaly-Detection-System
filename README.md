@@ -110,8 +110,6 @@ $$
 ### Setup
 
 ```bash
-git clone https://github.com/your-username/network-traffic-anomaly-detection.git
-cd network-traffic-anomaly-detection
 pip install -r requirements.txt
 python main.py --mode both
 ```
