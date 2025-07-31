@@ -1,254 +1,216 @@
 # Network Traffic Anomaly Detection System
 
-## Project Objectives
+## Overview
 
-This initiative aims to address the growing requirement for automated network security surveillance in contemporary cybersecurity environments. The goals include:
+This project presents a machine learning–based system for detecting anomalous network traffic patterns. It supports both supervised and unsupervised approaches and is intended for use in cybersecurity scenarios such as intrusion detection, denial-of-service (DoS) mitigation, and traffic monitoring. The system is implemented in Python using the NSL-KDD dataset and includes a full pipeline: preprocessing, training, evaluation, and visualization.
 
-- **Create an Intelligent System**: Develop a machine learning-driven system capable of accurately detecting harmful network traffic patterns.
-- **Compare Learning Techniques**: Assess both supervised (Random Forest) and unsupervised (Isolation Forest) methodologies for applications in cybersecurity.
-- **Guarantee Scalability**: Build a flexible and scalable solution that can adjust to changing threat landscapes.
+## Objectives
 
-## Project Overview
+- **Develop an automated detection system** capable of identifying abnormal traffic behavior in near real-time.
+- **Compare learning strategies** by evaluating supervised (Random Forest) and unsupervised (Isolation Forest) models.
+- **Ensure scalability and modularity** to accommodate evolving datasets and future model enhancements.
 
-This project establishes an anomaly detection system based on machine learning to recognize abnormal patterns in network traffic, critical for cybersecurity functions such as intrusion detection, identifying DDoS attacks, and preventing data exfiltration. Developed in Python, the system employs the NSL-KDD dataset and integrates supervised learning (via a Random Forest Classifier) with unsupervised learning (through Isolation Forest) to provide thorough and effective anomaly detection. The workflow incorporates data preprocessing, model training, performance assessment, and result visualization.
+---
 
-## Mathematical Foundation
+## Methodology
 
-### Machine Learning Methods
+### Machine Learning Approaches
 
-**Random Forest (Supervised)** constructs an ensemble of decision trees, each splitting on feature thresholds to maximize **information gain** _(a measure used to choose the most informative feature to split on)_:
-\[
-\text{Information Gain}(S, A) = H(S) - \sum\_{v} \frac{|S_v|}{|S|} H(S_v)
-\]
+#### Random Forest (Supervised)
 
-- \(H(S) = -\sum p\*i \log_2 p_i\): Entropy of set \(S\) (measures the uncertainty or disorder in the data distribution)
-- \(S_v\): Subset after splitting on feature \(A\), value \(v\)
-- Aggregates tree predictions for robust classification
+Random Forest builds an ensemble of decision trees trained on different subsets of the data. Each tree selects features based on **information gain**, a metric that quantifies the reduction in entropy:
 
-**Isolation Forest (Unsupervised)** isolates anomalies by constructing random trees.  
-It is particularly effective for detecting outliers in **unlabeled** datasets, making it suitable for real-world anomaly detection where labeled data is scarce.
-\[
-E(h(x)) = c(n) \times 2^{-\frac{E(h(x))}{c(n)}}
-\]
+$$
+\text{Information Gain}(S, A) = H(S) - \sum_v \frac{|S_v|}{|S|} H(S_v)
+$$
 
-- \(h(x)\): Path length of point \(x\) in a tree
-- \(E(h(x))\): Expected path length across trees
-- \(c(n)\): Average path length of an unsuccessful search in a binary search tree
-- Shorter paths indicate anomalies
+- $H(S) = -\sum p_i \log_2 p_i$ measures uncertainty within dataset $S$.
+- Feature $A$ is selected when it results in a measurable entropy reduction across subsets $S_v$.
 
-### Information Theory
+#### Isolation Forest (Unsupervised)
 
-**Entropy-Based Anomaly Detection**:
+Isolation Forest identifies anomalies by randomly partitioning the dataset. Anomalies require fewer splits to isolate. The expected path length of an instance $x$ is used to assign anomaly scores:
 
-\[
-H(X) = -\sum p(x) \log_2 p(x)
-\]
+$$
+E(h(x)) = c(n) \cdot 2^{-\frac{E(h(x))}{c(n)}}
+$$
 
-High entropy indicates potential anomalies. .
+- $h(x)$: Path length to isolate point $x$
+- $c(n)$: Average path length in a binary search tree
+- Shorter paths correspond to anomalous behavior
 
-**Mutual Information** for feature selection:
+---
 
-\[
-I(X;Y) = \sum \sum p(x,y) \log_2 \frac{p(x,y)}{p(x)p(y)}
-\]
+### Supporting Concepts
 
-Enhances model performance by identifying relevant features).
+- **Entropy**: Used in both classification and anomaly scoring, calculated as
 
-## Technical Implementation
+  $$
+  H(X) = -\sum p(x) \log_2 p(x)
+  $$
+
+- **Mutual Information**: Used during feature selection to quantify shared information between a feature $X$ and the label $Y$:
+
+  $$
+  I(X;Y) = \sum_x \sum_y p(x,y) \log_2 \left( \frac{p(x,y)}{p(x)p(y)} \right)
+  $$
+
+---
+
+## Implementation Details
 
 ### Core Components
 
-1. **Data Generation (`utils/data_loader.py`)**:
+1. **Data Loader (`utils/data_loader.py`)**
+   Loads and preprocesses the NSL-KDD dataset.
 
-   - Loads and preprocesses network traffic data from the NSL-KDD dataset.
+2. **Preprocessing (`utils/preprocessing.py`)**
+   Applies label encoding, standardization, and feature transformation.
 
-2. **Preprocessing (`utils/preprocessing.py`)**:
+3. **Model Training**
 
-   - Applies standardization and categorical encoding for features like `packet_size` and `protocol`.
-   - Uses **linear algebra** for matrix transformations and **statistics** for scaling.
+   - `run_supervised.py`: Random Forest (`n_estimators=100`, `max_depth=10`)
+   - `run_unsupervised.py`: Isolation Forest (`contamination=0.1`)
 
-3. **Machine Learning Models**:
+4. **Evaluation (`utils/evaluate_models.py`)**
+   Computes accuracy, precision, recall, F1-score (supervised), and anomaly detection rates (unsupervised).
 
-   - **Supervised (`run_supervised.py`)**: Trains Random Forest (`n_estimators=100`, `max_depth=10`) on labeled data, achieving 71% accuracy, 94% attack precision, and 93% normal recall.
-   - **Unsupervised (`run_unsupervised.py`)**: Trains Isolation Forest (`contamination=0.1`, `n_estimators=100`), where `contamination=0.1` assumes 10% of the data is anomalous. The model detected anomalies in 49% of unlabeled traffic.
+5. **Visualization (`utils/visualizer.py`)**
+   Generates performance plots using Matplotlib and Seaborn.
 
-4. **Evaluation (`utils/evaluate_models.py`)**:
+6. **Orchestration (`main.py`)**
+   Runs the entire pipeline with a single command.
 
-   - Computes accuracy, precision, recall, and F1-score using `classification_report` for supervised models.
-   - Evaluates anomaly detection rates for unsupervised models.
+---
 
-5. **Visualization (`utils/visualizer.py`)**:
+### Network Features
 
-   - Generates plots using **Matplotlib** and **Seaborn**:
-     - `supervised_performance_detailed.png`: Performance metrics (precision, recall, F1-score) for Random Forest.
-     - `confusion_matrix.png`: Confusion matrix for Random Forest.
-     - `class_distribution_analysis.png`: Actual and predicted class distributions.
-     - `unsupervised_analysis.png`: Anomaly detection results for Isolation Forest.
-     - `model_comparison_analysis.png`: Compares supervised and unsupervised performance.
+| Feature              | Description                   | Distribution                   |
+| -------------------- | ----------------------------- | ------------------------------ |
+| `packet_size`        | Packet byte size              | $\sim N(\mu_1, \sigma_1^2)$    |
+| `flow_duration`      | Duration of network flow      | $\sim \text{Exp}(\lambda)$     |
+| `packets_per_second` | Packet rate                   | $\sim N(\mu_2, \sigma_2^2)$    |
+| `bytes_per_second`   | Bandwidth utilization         | $\sim N(\mu_3, \sigma_3^2)$    |
+| `tcp_flags`          | Flag combinations             | $\sim \text{Poisson}(\lambda)$ |
+| `port_number`        | Source/destination ports      | Categorical                    |
+| `protocol`           | Protocol type (e.g. TCP, UDP) | Categorical                    |
 
-6. **Pipeline (`main.py`)**:
-   - Orchestrates data generation, preprocessing, model training, evaluation, and visualization.
+> Anomalous data is generated by shifting the mean:
+> $X_{\text{anomaly}} \sim N(\mu + k\sigma, \sigma^2), k > 2$
 
-### Network Traffic Features
+---
 
-| Feature              | Description                 | Mathematical Representation        |
-| -------------------- | --------------------------- | ---------------------------------- |
-| `packet_size`        | Size of network packets     | \(X \sim N(\mu_1, \sigma_1^2)\)    |
-| `flow_duration`      | Duration of network flows   | \(X \sim \text{Exp}(\lambda)\)     |
-| `packets_per_second` | Rate of packet transmission | \(X \sim N(\mu_2, \sigma_2^2)\)    |
-| `bytes_per_second`   | Bandwidth utilization       | \(X \sim N(\mu_3, \sigma_3^2)\)    |
-| `tcp_flags`          | TCP flag combinations       | \(X \sim \text{Poisson}(\lambda)\) |
-| `port_number`        | Network port numbers        | Categorical                        |
-| `protocol`           | Network protocol type       | Categorical                        |
+## Installation
 
-**Anomaly Generation**: Normal traffic follows \(X \sim N(\mu, \sigma^2)\); anomalous traffic follows \(X \sim N(\mu + k\sigma, \sigma^2)\), where \(k > 2\).
+### Requirements
 
-## Installation and Usage
+- Python 3.8+
+- Libraries listed in `requirements.txt`
 
-### Setup Instructions
+### Setup
 
-1. Clone the repository:
+```bash
+git clone https://github.com/your-username/network-traffic-anomaly-detection.git
+cd network-traffic-anomaly-detection
+pip install -r requirements.txt
+python main.py --mode both
+```
 
-   ```bash
-   git clone https://github.com/your-username/network-traffic-anomaly-detection.git
-   cd network-traffic-anomaly-detection
-   ```
+---
 
-2. Install dependencies:
+## Performance Summary
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Supervised: Random Forest
 
-3. Run the pipeline:
-   ```bash
-   python main.py --mode both
-   ```
+| Class        | Precision | Recall | F1-Score | Samples |
+| ------------ | --------- | ------ | -------- | ------- |
+| Attack       | 0.94      | 0.60   | 0.73     | 22,531  |
+| Normal       | 0.55      | 0.93   | 0.69     | 11,863  |
+| **Accuracy** | **0.71**  |        |          |         |
 
-## Performance Metrics
+- High attack precision reduces false positives
+- Lower recall suggests some attack types remain undetected
 
-### Evaluation Criteria
+### Unsupervised: Isolation Forest
 
-- **Accuracy**: Overall correctness of classifications (71% for Random Forest).
-- **Precision**: Proportion of true anomalies among detected anomalies (94% for attacks).
-- **Recall**: Proportion of actual anomalies detected (93% for normal traffic).
-- **F1-Score**: Harmonic mean of precision and recall.
+- Anomaly Detection Rate: 49%
+- Contamination parameter: 0.1 (assumes 10% anomalies)
+- Suitable for detecting unknown or unseen attack patterns
 
-### Random Forest Performance (Supervised)
+---
 
-| Class          | Precision           | Recall | F1-Score | Support |
-| -------------- | ------------------- | ------ | -------- | ------- |
-| Attack         | 0.94                | 0.60   | 0.73     | 22,531  |
-| Normal Traffic | 0.55                | 0.93   | 0.69     | 11,863  |
-| **Overall**    | **0.71 (Accuracy)** |        |          |         |
+## Visual Results
 
-### Isolation Forest Performance (Unsupervised)
+| Visualization                         | Description                           |
+| ------------------------------------- | ------------------------------------- |
+| `supervised_performance_detailed.png` | Class-wise metrics for Random Forest  |
+| `confusion_matrix.png`                | Heatmap of classification results     |
+| `class_distribution_analysis.png`     | Actual vs. predicted label ratios     |
+| `unsupervised_analysis.png`           | Isolation Forest anomaly distribution |
+| `model_comparison_analysis.png`       | Side-by-side performance comparison   |
 
-- **Anomaly Detection Rate**: 49% of unlabeled traffic flagged as anomalies.
-- **Expected Metrics**: Accuracy 0.89–0.92, precision 0.85–0.88, recall 0.82–0.87, F1-score 0.83–0.87 (based on prior benchmarks).
+---
 
-**Key Insights**:
+## Observations
 
-- **Random Forest**: Achieves 94% precision for attack detection, ensuring low false positives, but 60% recall indicates 40% of attacks may go undetected.
-- **Isolation Forest**: Detects anomalies in 49% of unlabeled traffic, suitable for unsupervised scenarios.
-- **Class Imbalance**: The 65.5% attack vs. 34.5% normal distribution impacts normal traffic precision (55%).
-- **Trade-Off**: High normal traffic recall (93%) minimizes disruptions, while moderate attack recall (60%) suggests a conservative approach.
+### Strengths
 
-## Visualizations
+- Achieved high precision (94%) for detecting malicious traffic
+- High recall (93%) for normal traffic
+- Modular and extensible architecture
+- Supports both labeled and unlabeled data scenarios
 
-The pipeline generates visualizations to provide insights into anomaly detection, leveraging **statistics** and **data visualization** with **Matplotlib** and **Seaborn**.
+### Limitations
 
-### Screenshots
+- 60% recall for attack traffic leaves room for improvement
+- Class imbalance (65.5% attack, 34.5% normal) impacted model performance
+- Additional tuning and resampling methods may improve detection
 
-- **Supervised Performance (`visuals/supervised_performance_detailed.png`)**: Bar charts showing precision (94% attack, 55% normal), recall (60% attack, 93% normal), and F1-score (0.73 attack, 0.69 normal), plus overall metrics (71% accuracy). This visualization, grounded in **statistics**, highlights model performance.
+---
 
-  ![Supervised Performance](visuals/supervised_performance_detailed.png)
+## Applications
 
-- **Confusion Matrix (`visuals/confusion_matrix.png`)**: A heatmap showing true vs. predicted labels for Random Forest, with 94% attack precision and 93% normal recall. This visualization uses **statistics** to assess model performance.
+- **Intrusion Detection**: Detects abnormal access patterns and misuse
+- **DDoS Mitigation**: Flags potential flooding behaviors
+- **Malware Detection**: Identifies suspicious traffic patterns
+- **Data Exfiltration Monitoring**: Tracks large or unexpected transfers
 
-  ![Confusion Matrix](visuals/confusion_matrix.png)
+---
 
-- **Class Distribution (`visuals/class_distribution_analysis.png`)**: Pie charts comparing actual (65.5% attack, 34.5% normal) and predicted class distributions, highlighting class imbalance. This visualization, grounded in **probability**, aids in understanding data characteristics.
+## Complexity
 
-  ![Class Distribution](visuals/class_distribution_analysis.png)
+| Algorithm        | Time Complexity (Training/Inference) |
+| ---------------- | ------------------------------------ |
+| Random Forest    | $O(n \log n)$                        |
+| Isolation Forest | $O(n \log n)$                        |
 
-- **Unsupervised Analysis (`visuals/unsupervised_analysis.png`)**: Composite plot showing Isolation Forest’s anomaly detection (49% anomalies), including pie charts, detection rate bars, and sample counts. This visualization uses **statistics** and **probability** to summarize unsupervised results.
-
-  ![Unsupervised Analysis](visuals/unsupervised_analysis.png)
-
-- **Model Comparison (`visuals/model_comparison_analysis.png`)**: Compares Random Forest accuracy (71%) with Isolation Forest anomaly rate (49%), alongside class performance and distributions. This visualization, grounded in **statistics**, highlights the dual-approach methodology.
-
-  ![Model Comparison](visuals/model_comparison_analysis.png)
-
-## Key Insights and Learnings
-
-### Successful Outcomes
-
-- **Robust Attack Detection**: Achieved 94% precision in identifying attacks, ensuring high confidence in flagged malicious activities.
-- **Effective Normal Traffic Handling**: 93% recall for normal traffic minimizes disruptions to legitimate operations.
-- **Dual Methodology Success**: Supervised (Random Forest) and unsupervised (Isolation Forest) approaches provided complementary insights, with Random Forest excelling at known attack detection and Isolation Forest revealing hidden anomalies.
-- **Scalable Architecture**: The modular system supports additional algorithms and evolving threat landscapes.
-
-### Areas for Improvement
-
-- **Class Imbalance**: The 65.5% attack vs. 34.5% normal distribution reduced normal traffic precision (55%), requiring balanced datasets.
-- **Attack Recall**: 60% recall for attacks indicates 40% may go undetected, suggesting enhanced feature engineering.
-- **Model Tuning**: Further hyperparameter optimization (e.g., tree depth in Random Forest) could improve performance.
-
-### Key Learnings
-
-- **Precision vs. Recall Trade-Off**: In cybersecurity, balancing false positives and false negatives is critical.
-- **Data Quality**: Class imbalance significantly impacts model performance, emphasizing robust preprocessing.
-- **Ensemble Benefits**: Random Forest’s multiple decision trees provided robust attack pattern recognition.
-- **Unsupervised Value**: Isolation Forest’s ability to detect anomalies in unlabeled data highlights its utility in real-world scenario.
-
-## Academic and Practical Significance
-
-### Cybersecurity Applications
-
-- **Intrusion Detection**: Identifies malicious activities with 94% precision.
-- **DDoS Detection**: Recognizes distributed denial-of-service attack patterns.
-- **Malware Communication**: Detects command-and-control traffic.
-- **Data Exfiltration**: Flags unusual data transfer behaviors.
-
-### Algorithm Complexity
-
-- **Random Forest**: O(n log n) for training and prediction.
-- **Isolation Forest**: O(n log n) average case for tree construction.
+---
 
 ## Project Structure
 
 ```
 network-traffic-anomaly-detection/
-│
 ├── utils/
-│   run_supervised.py         # Supervised pipeline (Random Forest)
-│   run_unsupervised.py       # Unsupervised pipeline (Isolation Forest)
-│   data_loader.py            # Generates synthetic network traffic
-│   preprocessing.py          # Handles data preprocessing
-│   evaluate_models.py        # Evaluates performance metrics
-│   visualizer.py             # Generates visualizations
-│   main.py                   # Pipeline orchestration
-├── visuals/
-│   ├── supervised_performance_detailed.png     # Performance metrics
-│   ├── confusion_matrix.png                    # Confusion matrix
-│   ├── class_distribution_analysis.png         # Class distributions
-│   ├── unsupervised_analysis.png               # Anomaly detection results
-│   ├── model_comparison_analysis.png           # Model comparison
+│   ├── run_supervised.py
+│   ├── run_unsupervised.py
+│   ├── data_loader.py
+│   ├── preprocessing.py
+│   ├── evaluate_models.py
+│   └── visualizer.py
+├── main.py
 ├── models/
-│   ├── supervised_rf.pkl                       # Trained Random Forest model
-│   ├── unsupervised_if.pkl                     # Trained Isolation Forest model
-│   ├── scaler.pkl                              # Feature scaler
+│   ├── supervised_rf.pkl
+│   ├── unsupervised_if.pkl
+│   └── scaler.pkl
+├── visuals/
 ├── requirements.txt
 └── README.md
 ```
 
+---
+
 ## References
 
-1. Breiman, L. (2001). _Random Forests_. _Machine Learning_, 45(1), 5-32. DOI: 10.1023/A:1010933404324.
-2. Liu, F. T., Ting, K. M., & Zhou, Z. H. (2008). _Isolation Forest_. In _IEEE International Conference on Data Mining (ICDM)_. DOI: 10.1109/ICDM.2008.17.
-3. [Scikit-learn: Machine Learning in Python](https://scikit-learn.org/stable/).
-
-## License
-
-This project is licensed under the MIT License.
+1. Breiman, L. (2001). _Random Forests_. _Machine Learning_, 45(1), 5–32. [https://doi.org/10.1023/A:1010933404324](https://doi.org/10.1023/A:1010933404324)
+2. Liu, F. T., Ting, K. M., & Zhou, Z. H. (2008). _Isolation Forest_. _ICDM_. [https://doi.org/10.1109/ICDM.2008.17](https://doi.org/10.1109/ICDM.2008.17)
+3. [Scikit-learn documentation](https://scikit-learn.org/stable/)
